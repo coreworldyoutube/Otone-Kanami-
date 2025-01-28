@@ -1,12 +1,17 @@
 import torch
-from your_model import YourModel  # 実際にはTacotron2やWaveNetなどを読み込む
+import requests
+from io import BytesIO
 
-# 訓練したモデルの重みを読み込む
-model = YourModel()
-model.load_state_dict(torch.load("path_to_model.pth"))
+def download_model_from_google_drive(drive_url):
+    # Google Driveからモデルをダウンロード
+    file_id = drive_url.split('/')[-2]
+    url = f'https://drive.google.com/uc?export=download&id={file_id}'
+    response = requests.get(url)
+    return BytesIO(response.content)
+
+# モデルファイルをGoogle Driveからダウンロード
+model_file = download_model_from_google_drive('https://drive.google.com/file/d/your_file_id/view?usp=sharing')
+
+# Tacotron2のモデルを読み込む
+model = torch.load(model_file)
 model.eval()
-
-def synthesize_text(text: str):
-    # ここでテキストを音声に変換
-    audio = model.generate_audio(text)
-    return audio  # 音声データを返す

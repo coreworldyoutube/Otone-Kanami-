@@ -1,15 +1,21 @@
 from fastapi import FastAPI
+import torch
+from model import Tacotron2 # 訓練したモデルのインポート
 from gtts import gTTS
-from io import BytesIO
+import io
 import base64
 
+# FastAPIのインスタンス
 app = FastAPI()
 
+# 訓練したモデルを読み込み
+model = Tacotron2()
+model.load_state_dict(torch.load('model.pth'))
+
 @app.post("/synthesize/")
-async def synthesize(text: str):
-    tts = gTTS(text=text, lang='ja')
-    audio_fp = BytesIO()
-    tts.save(audio_fp)
-    audio_fp.seek(0)
-    audio_base64 = base64.b64encode(audio_fp.read()).decode('utf-8')
+async def synthesize_text(text: str):
+    # テキストを音声に変換
+    audio = model.synthesize(text)  # モデルを使って音声を生成
+    audio_base64 = base64.b64encode(audio).decode('utf-8')  # Base64エンコードして返す
+
     return {"audio": audio_base64}

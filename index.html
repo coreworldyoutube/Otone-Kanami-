@@ -1,8 +1,33 @@
+<!DOCTYPE html>
 <html>
-    <body>
-        <form method="POST" action="/synthesize/">
-            <textarea name="text" placeholder="音声にしたいテキストを入力"></textarea>
-            <button type="submit">音声を生成</button>
-        </form>
-    </body>
+<head>
+    <title>音声合成</title>
+</head>
+<body>
+    <h1>テキストを音声に変換</h1>
+    <form id="synthesize-form">
+        <textarea id="text-input" placeholder="テキストを入力"></textarea><br>
+        <button type="submit">音声生成</button>
+    </form>
+
+    <audio id="audio-player" controls></audio>
+
+    <script>
+        document.getElementById('synthesize-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const text = document.getElementById('text-input').value;
+            const response = await fetch('https://your-heroku-app-url/synthesize/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text })
+            });
+
+            const data = await response.json();
+            const audio = new Audio('data:audio/mp3;base64,' + data.audio);
+            audio.play();
+        });
+    </script>
+</body>
 </html>
